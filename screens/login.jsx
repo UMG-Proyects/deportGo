@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,36 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../redux/user/action";
+import axios from "../axios";
+import * as SecureStore from "expo-secure-store";
 
-export default function login() {
+export default function Login({ navigation }) {
+  const dispatch = useDispatch();
+  const user = useSelector((store) => store.user.user);
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState([]);
+
+  const login = () => {
+    setError([]);
+    axios
+      .post("login", form)
+      .then(async ({ data }) => {
+        dispatch(setUser(data.user));
+        await SecureStore.setItemAsync("token", data.accesToken);
+        navigation.navigate("home");
+      })
+      .catch((err) => {
+        setError(err.response.data);
+      });
+  };
+
   return (
     <SafeAreaView>
       <View
@@ -27,19 +55,46 @@ export default function login() {
           }}
         >
           <Text style={{ fontSize: 20 }}>Login Page</Text>
-
-          <View style={{ marginTop: 30 }}>
+          {/* <Text style={{ fontSize: 30 }}>{user}</Text> */}
+          <Text style={{ fontSize: 20 }}>{user.email}</Text>
+          <Text style={{ color: "red", fontSize: 16, marginTop: 18 }}>
+            {error?.message ? error.message : ""}
+          </Text>
+          <View style={{ marginTop: 10 }}>
             <Text>Email</Text>
-            <TextInput style={style.input} />
-          </View>
-
-          <View style={{ marginTop: 30 }}>
-            <Text>Password</Text>
-            <TextInput secureTextEntry={true} style={style.input} />
+            <TextInput
+              onChangeText={(text) => {
+                form.email = text;
+              }}
+              style={style.input}
+            />
+            <Text style={{ color: "red" }}>
+              {error?.email ? error.email[0] : ""}
+            </Text>
           </View>
 
           <View style={{ marginTop: 15 }}>
-            <TouchableOpacity style={[style.input, { width: "20%" }]}>
+            <Text>Password</Text>
+            <TextInput
+              onChangeText={(text) => {
+                form.password = text;
+              }}
+              secureTextEntry={true}
+              style={style.input}
+            />
+
+            <Text style={{ color: "red" }}>
+              {error?.password ? error.password[0] : ""}
+            </Text>
+          </View>
+
+          <View style={{ marginTop: 15 }}>
+            <TouchableOpacity
+              onPress={() => {
+                login();
+              }}
+              style={[style.input, { width: "20%" }]}
+            >
               <Text style={{ color: "white", textAlign: "center" }}>Login</Text>
             </TouchableOpacity>
           </View>
