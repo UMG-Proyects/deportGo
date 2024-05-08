@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../redux/user/action";
 import axios from "../axios";
 import * as SecureStore from "expo-secure-store";
+import { StatusBar } from "react-native";
 
 export default function Login({ navigation }) {
   const dispatch = useDispatch();
@@ -30,6 +31,8 @@ export default function Login({ navigation }) {
       .then(async ({ data }) => {
         dispatch(setUser(data.user));
         await SecureStore.setItemAsync("token", data.accesToken);
+        axios.defaults.headers.common["Authorization"] =
+          "Bearer " + data.accesToken;
         navigation.navigate("home");
       })
       .catch((err) => {
@@ -37,13 +40,40 @@ export default function Login({ navigation }) {
       });
   };
 
+  useEffect(() => {
+    (async () => {
+      const token = await SecureStore.getItemAsync("token");
+      if (token) {
+        axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+        axios
+          .get("profile")
+          .then(({ data }) => {
+            dispatch(setUser(data.data));
+            navigation.navigate("home");
+          })
+          .catch(async () => {
+            await SecureStore.deleteItemAsync("token");
+          });
+      }
+    })();
+  }, []);
+
+  // Oculta la barra de navegación en esta pantalla
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, []);
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar backgroundColor="#011627" barStyle="light-content" />
       <View
         style={{
+          backgroundColor: "#011627",
+          flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          height: "100%",
         }}
       >
         <View
@@ -54,10 +84,10 @@ export default function Login({ navigation }) {
             borderRadius: 10,
           }}
         >
-          <Text style={{ fontSize: 20 }}>Login Page</Text>
-          {/* <Text style={{ fontSize: 30 }}>{user}</Text> */}
-          <Text style={{ fontSize: 20 }}>{user.email}</Text>
-          <Text style={{ color: "red", fontSize: 16, marginTop: 18 }}>
+          <View style={{ marginTop: 10, alignItems: "center" }}>
+            <Text style={{ fontSize: 20 }}>Login</Text>
+          </View>
+          <Text style={{ color: "red", fontSize: 16, marginTop: 5 }}>
             {error?.message ? error.message : ""}
           </Text>
           <View style={{ marginTop: 10 }}>
@@ -73,7 +103,7 @@ export default function Login({ navigation }) {
             </Text>
           </View>
 
-          <View style={{ marginTop: 15 }}>
+          <View style={{ marginTop: 10 }}>
             <Text>Password</Text>
             <TextInput
               onChangeText={(text) => {
@@ -88,14 +118,26 @@ export default function Login({ navigation }) {
             </Text>
           </View>
 
-          <View style={{ marginTop: 15 }}>
+          <View
+            style={{ marginTop: 10, marginBottom: 10, alignItems: "center" }}
+          >
             <TouchableOpacity
               onPress={() => {
                 login();
               }}
-              style={[style.input, { width: "20%" }]}
+              style={{ width: "70%" }}
             >
-              <Text style={{ color: "white", textAlign: "center" }}>Login</Text>
+              <Text
+                style={{
+                  backgroundColor: "#2EC4B6",
+                  color: "black",
+                  textAlign: "center",
+                  borderRadius: 10,
+                  padding: 5,
+                }}
+              >
+                Iniciar Sesión
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -106,7 +148,7 @@ export default function Login({ navigation }) {
 
 const style = StyleSheet.create({
   input: {
-    backgroundColor: "#6699cc",
+    backgroundColor: "#EBF2F0",
     padding: 7,
     borderRadius: 6,
   },
