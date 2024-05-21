@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -12,6 +13,7 @@ import { setUser } from "../redux/user/action";
 import axios from "../axios";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Login({ navigation }) {
   const dispatch = useDispatch();
@@ -22,6 +24,7 @@ export default function Login({ navigation }) {
     password: "",
   });
 
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState([]);
 
   const login = () => {
@@ -70,7 +73,7 @@ export default function Login({ navigation }) {
       <StatusBar backgroundColor="#011627" barStyle="light-content" />
       <View
         style={{
-          backgroundColor: "#011627",
+          backgroundColor: "#fff",
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
@@ -78,21 +81,27 @@ export default function Login({ navigation }) {
       >
         <View
           style={{
-            backgroundColor: "white",
             padding: 10,
-            width: "80%",
+            width: "90%",
             borderRadius: 10,
           }}
         >
-          <View style={{ marginTop: 10, alignItems: "center" }}>
-            <Text style={{ fontSize: 20 }}>Login</Text>
+          <View style={{ alignItems: "center" }}>
+            <Image
+              source={require("../src/Image/logo.jpeg")} // Reemplaza con la ruta correcta de tu logo
+              style={{
+                width: 200,
+                height: 200,
+              }} // Ajusta el tamaño de la imagen según sea necesario
+            />
           </View>
           <Text style={{ color: "red", fontSize: 16, marginTop: 5 }}>
             {error?.message ? error.message : ""}
           </Text>
-          <View style={{ marginTop: 10 }}>
-            <Text>Email</Text>
+          <View style={{ marginTop: 5 }}>
             <TextInput
+              placeholder="Email"
+              placeholderTextColor="gray"
               onChangeText={(text) => {
                 form.email = text;
               }}
@@ -104,15 +113,25 @@ export default function Login({ navigation }) {
           </View>
 
           <View style={{ marginTop: 10 }}>
-            <Text>Password</Text>
-            <TextInput
-              onChangeText={(text) => {
-                form.password = text;
-              }}
-              secureTextEntry={true}
-              style={style.input}
-            />
-
+            <View style={style.passwordContainer}>
+              <TextInput
+                placeholder=" Password"
+                placeholderTextColor="gray"
+                secureTextEntry={!isPasswordVisible}
+                onChangeText={(text) => setForm({ ...form, password: text })}
+                style={style.passwordInput}
+              />
+              <TouchableOpacity
+                onPress={() => setPasswordVisible(!isPasswordVisible)}
+                style={style.eyeIcon}
+              >
+                <Icon
+                  name={isPasswordVisible ? "visibility" : "visibility-off"}
+                  size={24}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
             <Text style={{ color: "red" }}>
               {error?.password ? error.password[0] : ""}
             </Text>
@@ -125,21 +144,29 @@ export default function Login({ navigation }) {
               onPress={() => {
                 login();
               }}
-              style={{ width: "70%" }}
+              style={{ width: "90%" }}
             >
               <Text
                 style={{
                   backgroundColor: "#2EC4B6",
                   color: "black",
+                  fontWeight: "bold",
                   textAlign: "center",
-                  borderRadius: 10,
-                  padding: 5,
+                  borderRadius: 15,
+                  padding: 10,
                 }}
               >
                 Iniciar Sesión
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={style.footer}>
+          <Text style={style.textFoot}>¿No tienes cuenta? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Registro")}>
+            <Text style={[style.textFooter, style.link]}>Crear cuenta</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -148,8 +175,45 @@ export default function Login({ navigation }) {
 
 const style = StyleSheet.create({
   input: {
-    backgroundColor: "#EBF2F0",
+    backgroundColor: "#EBF2F5",
     padding: 7,
-    borderRadius: 6,
+    borderRadius: 15,
+    borderColor: "000",
+    borderWidth: 1,
+    height: 50,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EBF2F5",
+    borderRadius: 15,
+    borderColor: "#000",
+    borderWidth: 1,
+    height: 50,
+  },
+  eyeIcon: {
+    padding: 10,
+    position: "absolute",
+    right: 0,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 5,
+  },
+  textFooter: {
+    color: "#2EC4B6",
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
+  textFoot: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  link: {
+    textDecorationLine: "underline",
+    marginLeft: 5,
   },
 });
