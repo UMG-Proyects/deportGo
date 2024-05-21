@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import Login from "./screens/login";
-import Home from "./screens/home";
+import Hom from "./components/Navigation";
 import Registro from "./screens/ScreenRegistro";
 
 const Stack = createNativeStackNavigator();
@@ -16,8 +16,8 @@ function App() {
         <Stack.Navigator initialRouteName="login">
           <Stack.Screen name="login" component={Login} />
           <Stack.Screen
-            name="home"
-            component={Home}
+            name="hom"
+            component={Hom}
             options={{ headerShown: false }}
           />
           <Stack.Screen name="Registro" component={Registro} />

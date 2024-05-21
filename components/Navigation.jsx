@@ -1,9 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Perfil from "./ScreenPerfil";
-import Ajustes from "./ScreenAjustes";
-import Home from "./ScreenHome";
+import Perfil from "../screens/ScreenPerfil";
+import Ajustes from "../screens/ScreenAjustes";
+import Home from "../screens/ScreenHome";
 import { MaterialIcons } from "@expo/vector-icons"; // Importa los iconos de MaterialIcons
 
 const Tab = createBottomTabNavigator();

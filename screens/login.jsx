@@ -36,7 +36,7 @@ export default function Login({ navigation }) {
         await SecureStore.setItemAsync("token", data.accesToken);
         axios.defaults.headers.common["Authorization"] =
           "Bearer " + data.accesToken;
-        navigation.navigate("home");
+        navigation.navigate("hom");
       })
       .catch((err) => {
         setError(err.response.data);
@@ -52,7 +52,7 @@ export default function Login({ navigation }) {
           .get("profile")
           .then(({ data }) => {
             dispatch(setUser(data.data));
-            navigation.navigate("home");
+            navigation.navigate("hom");
           })
           .catch(async () => {
             await SecureStore.deleteItemAsync("token");
