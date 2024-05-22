@@ -15,6 +15,8 @@ import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
+import Hom from "../components/Navigation";
+
 export default function Login({ navigation }) {
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user.user);
@@ -178,7 +180,7 @@ const style = StyleSheet.create({
     backgroundColor: "#EBF2F5",
     padding: 7,
     borderRadius: 15,
-    borderColor: "000",
+    borderColor: "#000",
     borderWidth: 1,
     height: 50,
   },
