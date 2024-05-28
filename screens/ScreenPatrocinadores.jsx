@@ -230,7 +230,7 @@ export default function PatrocinadorScreen() {
           <TextInput
             style={styles.input}
             placeholder="Teléfono"
-            value={currentPatrocinador.telefono}
+            value={String(currentPatrocinador.telefono)}
             onChangeText={(text) =>
               setCurrentPatrocinador({ ...currentPatrocinador, telefono: text })
             }

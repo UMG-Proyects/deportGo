@@ -250,7 +250,7 @@ export default function Organizador() {
           <TextInput
             style={styles.input}
             placeholder="Teléfono"
-            value={currentArbitro.telefono}
+            value={String(currentPatrocinador.telefono)}
             onChangeText={(text) =>
               setCurrentArbitro({ ...currentArbitro, telefono: text })
             }

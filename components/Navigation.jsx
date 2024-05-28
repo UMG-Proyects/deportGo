@@ -56,7 +56,7 @@ const DrawerNavigator = () => {
         header: () => <Nav navigation={navigation} title={route.name} />,
       })}
     >
-      <Drawer.Screen name="Home" component={BottomTabNavigator} />
+      <Drawer.Screen name="Homes" component={BottomTabNavigator} />
       <Drawer.Screen name="Deportes" component={Deportes} />
       <Drawer.Screen name="Categorias" component={Categorias} />
       <Drawer.Screen name="Arbitros" component={Arbitros} />
