@@ -9,6 +9,8 @@ import Categorias from "../screens/ScreenCategoria";
 import Arbitros from "../screens/ScreenArbitro";
 import { MaterialIcons } from "@expo/vector-icons"; // Importa los iconos de MaterialIcons
 import Nav from "../components/Nav";
+import Patrocinador from "../screens/ScreenPatrocinadores";
+import Organizador from "../screens/ScreenOrganizador";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -66,6 +68,8 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="Deportes" component={Deportes} />
       <Drawer.Screen name="Categorias" component={Categorias} />
       <Drawer.Screen name="Arbitros" component={Arbitros} />
+      <Drawer.Screen name="Patrocinador" component={Patrocinador} />
+      <Drawer.Screen name="Organizador" component={Organizador} />
     </Drawer.Navigator>
   );
 };
