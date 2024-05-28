@@ -63,15 +63,7 @@ const DrawerNavigator = () => {
           ),
         }}
       />
-      <Drawer.Screen
-        name="Deportes"
-        component={Deportes}
-        options={{
-          drawerIcon: ({ focused, color, size }) => (
-            <MaterialIcons name="fa-futbol" size={24} color={"#000"} />
-          ),
-        }}
-      />
+      <Drawer.Screen name="Deportes" component={Deportes} />
       <Drawer.Screen name="Categorias" component={Categorias} />
       <Drawer.Screen name="Arbitros" component={Arbitros} />
     </Drawer.Navigator>
