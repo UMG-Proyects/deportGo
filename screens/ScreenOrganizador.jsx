@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import API_URL from "../src/config/config";
 
-export default function Arbitro() {
+export default function Organizador() {
   const [arbitros, setArbitros] = useState([]);
   const [filteredArbitros, setFilteredArbitros] = useState([]);
   const [search, setSearch] = useState("");
