@@ -170,14 +170,17 @@ export default function Arbitro() {
           <View style={styles.arbitroContainer}>
             <Text>{item.primer_nombre}</Text>
             <View style={styles.buttonContainer}>
-              <Button
-                title="Editar"
-                onPress={() => {
-                  setCurrentArbitro(item);
-                  openModal();
-                }}
-                color="#2EC4B6"
-              />
+              <View style={{ marginRight: 8 }}>
+                <Button
+                  title="Editar"
+                  onPress={() => {
+                    setCurrentArbitro(item);
+                    openModal();
+                  }}
+                  color="#2EC4B6"
+                />
+              </View>
+
               <Button
                 title="Desactivar"
                 onPress={() => handleDeactivateArbitro(item.id)}
@@ -266,7 +269,9 @@ export default function Arbitro() {
             }}
             color="#2EC4B6"
           />
-          <Button title="Cancelar" onPress={closeModal} color="red" />
+          <View style={{ marginTop: 8 }}>
+            <Button title="Cancelar" onPress={closeModal} color="red" />
+          </View>
         </View>
       </Modal>
     </View>
@@ -295,6 +300,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
+    marginTop: 8, // Agregar espacio arriba de los botones
   },
   modalContainer: {
     flex: 1,
