@@ -1,38 +1,29 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { HomeScreen } from "../screens/ScreenHome";
-import { ProfileScreen } from "../screens/ScreenPerfil";
-import { SettingScreen } from "../screens/ScreenAjustes";
-import { DeportScreen } from "../screens/ScreenDeporte";
-import { CategoryScreen } from "../screens/ScreenCategoria";
-import { ReferyScreen } from "../screens/ScreenArbitro";
+import { View, Image, TouchableOpacity, Text } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
-const BottomTab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
-
-const BottomTabNavigator = () => {
+const CustomHeader = ({ navigation, title }) => {
   return (
-    <BottomTab.Navigator>
-      <BottomTab.Screen name="Home" component={HomeScreen} />
-      <BottomTab.Screen name="Perfil" component={ProfileScreen} />
-      <BottomTab.Screen name="Ajustes" component={SettingScreen} />
-    </BottomTab.Navigator>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 10,
+        backgroundColor: "#fff",
+      }}
+    >
+      <TouchableOpacity onPress={() => navigation.openDrawer()}>
+        <MaterialIcons name="menu" size={28} color="black" />
+      </TouchableOpacity>
+      <View style={{ flex: 1, alignItems: "center" }}>
+        <Text style={{ fontSize: 22, fontWeight: "bold" }}>{title}</Text>
+      </View>
+      <Image
+        source={require("../src/Image/logo.jpeg")}
+        style={{ width: 45, height: 45 }}
+      />
+    </View>
   );
 };
 
-const Nav = () => {
-  return (
-    <NavigationContainer>
-      <Drawer.Navigator>
-        <Drawer.Screen name="Main" component={BottomTabNavigator} />
-        <Drawer.Screen name="Deportes" component={DeportScreen} />
-        <Drawer.Screen name="Categorias" component={CategoryScreen} />
-        <Drawer.Screen name="Arbitros" component={ReferyScreen} />
-      </Drawer.Navigator>
-    </NavigationContainer>
-  );
-};
-
-export default Nav;
+export default CustomHeader;

@@ -1,15 +1,21 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Home from "../screens/ScreenHome";
 import Perfil from "../screens/ScreenPerfil";
 import Ajustes from "../screens/ScreenAjustes";
-import Home from "../screens/ScreenHome";
+import Deportes from "../screens/ScreenDeporte";
+import Categorias from "../screens/ScreenCategoria";
+import Arbitros from "../screens/ScreenArbitro";
 import { MaterialIcons } from "@expo/vector-icons"; // Importa los iconos de MaterialIcons
+import Nav from "../components/Nav";
 
 const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 
-export default function Hom() {
+const BottomTabNavigator = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen
         name="Home"
         component={Home}
@@ -39,4 +45,39 @@ export default function Hom() {
       />
     </Tab.Navigator>
   );
+};
+
+const DrawerNavigator = () => {
+  return (
+    <Drawer.Navigator
+      screenOptions={({ navigation, route }) => ({
+        header: () => <Nav navigation={navigation} title={route.name} />,
+      })}
+    >
+      <Drawer.Screen
+        name="Home"
+        component={BottomTabNavigator}
+        options={{
+          drawerIcon: ({ focused, color, size }) => (
+            <MaterialIcons name="home" size={24} color={"#000"} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Deportes"
+        component={Deportes}
+        options={{
+          drawerIcon: ({ focused, color, size }) => (
+            <MaterialIcons name="fa-futbol" size={24} color={"#000"} />
+          ),
+        }}
+      />
+      <Drawer.Screen name="Categorias" component={Categorias} />
+      <Drawer.Screen name="Arbitros" component={Arbitros} />
+    </Drawer.Navigator>
+  );
+};
+
+export default function Navigation() {
+  return <DrawerNavigator />;
 }
