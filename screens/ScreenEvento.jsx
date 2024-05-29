@@ -9,8 +9,10 @@ import {
   Alert,
   Modal,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import API_URL from "../src/config/config";
 
 export default function Eventos() {
@@ -22,6 +24,8 @@ export default function Eventos() {
   const [filteredEventos, setFilteredEventos] = useState([]);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentEvento, setCurrentEvento] = useState({
     id: null,
     id_categoria: "",
@@ -63,7 +67,7 @@ export default function Eventos() {
 
   const fetchCategorias = async () => {
     try {
-      const response = await fetch(`${API_URL}listCat`); // Reemplazar con el endpoint adecuado
+      const response = await fetch(`${API_URL}listCat`);
       const data = await response.json();
       setCategorias(data);
     } catch (error) {
@@ -73,7 +77,7 @@ export default function Eventos() {
 
   const fetchDeportes = async () => {
     try {
-      const response = await fetch(`${API_URL}listarDeportes`); // Reemplazar con el endpoint adecuado
+      const response = await fetch(`${API_URL}listarDeportes`);
       const data = await response.json();
       setDeportes(data);
     } catch (error) {
@@ -85,6 +89,7 @@ export default function Eventos() {
     try {
       const response = await fetch(`${API_URL}listarMunicipios`);
       const data = await response.json();
+      console.log("municipio", data);
       setMunicipios(data);
     } catch (error) {
       console.error("Error fetching municipios:", error);
@@ -93,7 +98,7 @@ export default function Eventos() {
 
   const fetchPatrocinadores = async () => {
     try {
-      const response = await fetch(`${API_URL}listarPatrocinadores`); // Reemplazar con el endpoint adecuado
+      const response = await fetch(`${API_URL}listarPatrocinadores`);
       const data = await response.json();
       setPatrocinadores(data.patrocinador);
     } catch (error) {
@@ -131,7 +136,6 @@ export default function Eventos() {
         body: JSON.stringify(currentEvento),
       });
       const data = await response.json();
-      console.log(data);
       if (data.status) {
         fetchEventos();
         Alert.alert("Éxito", "Evento creado exitosamente");
@@ -141,7 +145,6 @@ export default function Eventos() {
       }
     } catch (error) {
       console.error("Error creating evento:", error);
-      Alert.alert("Error", "Ocurrió un error al crear el evento");
     }
   };
 
@@ -165,10 +168,26 @@ export default function Eventos() {
   };
 
   const handleInputChange = (field, value) => {
-    setCurrentEvento({
-      ...currentEvento,
-      [field]: value,
-    });
+    setCurrentEvento({ ...currentEvento, [field]: value });
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      handleInputChange("fecha_final", formattedDate);
+    }
+  };
+
+  const handleTimeChange = (event, selectedTime) => {
+    setShowTimePicker(Platform.OS === "ios");
+    if (selectedTime) {
+      const formattedTime = selectedTime
+        .toISOString()
+        .split("T")[1]
+        .substring(0, 8);
+      handleInputChange("hora", formattedTime);
+    }
   };
 
   return (
@@ -206,7 +225,7 @@ export default function Eventos() {
           <Picker
             selectedValue={currentEvento.id_categoria}
             onValueChange={(itemValue) =>
-              handleInputChange("id_categoria", itemValue)
+              setCurrentEvento({ ...currentEvento, id_categoria: itemValue })
             }
             style={styles.picker}
           >
@@ -223,7 +242,7 @@ export default function Eventos() {
           <Picker
             selectedValue={currentEvento.id_deporte}
             onValueChange={(itemValue) =>
-              handleInputChange("id_deporte", itemValue)
+              setCurrentEvento({ ...currentEvento, id_deporte: itemValue })
             }
             style={styles.picker}
           >
@@ -240,7 +259,7 @@ export default function Eventos() {
           <Picker
             selectedValue={currentEvento.id_patrocinador}
             onValueChange={(itemValue) =>
-              handleInputChange("id_patrocinador", itemValue)
+              setCurrentEvento({ ...currentEvento, id_patrocinador: itemValue })
             }
             style={styles.picker}
           >
@@ -261,7 +280,7 @@ export default function Eventos() {
           <Picker
             selectedValue={currentEvento.id_municipio}
             onValueChange={(itemValue) =>
-              handleInputChange("id_municipio", itemValue)
+              setCurrentEvento({ ...currentEvento, id_municipio: itemValue })
             }
             style={styles.picker}
           >
@@ -279,51 +298,87 @@ export default function Eventos() {
             style={styles.input}
             placeholder="Nombre"
             value={currentEvento.nombre}
-            onChangeText={(text) => handleInputChange("nombre", text)}
+            onChangeText={(text) =>
+              setCurrentEvento({ ...currentEvento, nombre: text })
+            }
           />
           <TextInput
             style={styles.input}
             placeholder="Descripción"
             value={currentEvento.descripcion}
-            onChangeText={(text) => handleInputChange("descripcion", text)}
+            onChangeText={(text) =>
+              setCurrentEvento({ ...currentEvento, descripcion: text })
+            }
           />
-          <TextInput
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
             style={styles.input}
-            placeholder="Fecha de inicio"
-            value={currentEvento.fecha_inicio}
-            onChangeText={(text) => handleInputChange("fecha_inicio", text)}
-          />
-          <TextInput
+          >
+            <Text>{currentEvento.fecha_inicio || "Fecha Inicio"}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
             style={styles.input}
-            placeholder="Fecha final"
-            value={currentEvento.fecha_final}
-            onChangeText={(text) => handleInputChange("fecha_final", text)}
-          />
-          <TextInput
+          >
+            <Text>{currentEvento.fecha_final || "Fecha final"}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+          <TouchableOpacity
+            onPress={() => setShowTimePicker(true)}
             style={styles.input}
-            placeholder="Hora"
-            value={currentEvento.hora}
-            onChangeText={(text) => handleInputChange("hora", text)}
-          />
+          >
+            <Text>{currentEvento.hora || "Hora"}</Text>
+          </TouchableOpacity>
+          {showTimePicker && (
+            <DateTimePicker
+              value={new Date()}
+              mode="time"
+              display="default"
+              onChange={handleTimeChange}
+            />
+          )}
+
           <TextInput
             style={styles.input}
             placeholder="Equipos participantes"
             value={currentEvento.equipos_participantes}
             onChangeText={(text) =>
-              handleInputChange("equipos_participantes", text)
+              setCurrentEvento({
+                ...currentEvento,
+                equipos_participantes: text,
+              })
             }
           />
           <TextInput
             style={styles.input}
             placeholder="Ubicación"
             value={currentEvento.ubicacion}
-            onChangeText={(text) => handleInputChange("ubicacion", text)}
+            onChangeText={(text) =>
+              setCurrentEvento({ ...currentEvento, ubicacion: text })
+            }
           />
           <TextInput
             style={styles.input}
             placeholder="Rama"
             value={currentEvento.rama}
-            onChangeText={(text) => handleInputChange("rama", text)}
+            onChangeText={(text) =>
+              setCurrentEvento({ ...currentEvento, rama: text })
+            }
           />
           <Button
             title="Agregar Evento"
@@ -378,6 +433,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingLeft: 10,
+    justifyContent: "center",
   },
   patrocinadorItem: {
     flexDirection: "row",
