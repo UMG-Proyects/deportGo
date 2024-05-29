@@ -11,143 +11,136 @@ import {
 } from "react-native";
 import API_URL from "../src/config/config";
 
-export default function Organizador() {
-  const [arbitros, setArbitros] = useState([]);
-  const [filteredArbitros, setFilteredArbitros] = useState([]);
+export default function Organizacion() {
+  const [organizaciones, setOrganizaciones] = useState([]);
+  const [filteredOrganizaciones, setFilteredOrganizaciones] = useState([]);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentArbitro, setCurrentArbitro] = useState({
+  const [currentOrganizacion, setCurrentOrganizacion] = useState({
     id: null,
-    primer_nombre: "",
-    segundo_nombre: "",
-    primer_apellido: "",
-    segundo_apellido: "",
-    genero: "",
-    direccion: "",
+    nombre: "",
     telefono: "",
+    correo_electronico: "",
+    no_de_cuenta: "",
   });
 
   useEffect(() => {
-    fetchArbitros();
+    fetchOrganizaciones();
   }, []);
 
-  const fetchArbitros = async () => {
+  const fetchOrganizaciones = async () => {
     try {
-      const response = await fetch(`${API_URL}listarArbitro`);
+      const response = await fetch(`${API_URL}listarOrganizaciones`);
       const data = await response.json();
-      setArbitros(data);
-      setFilteredArbitros(data);
+      console.log(data);
+      setOrganizaciones(data);
+      setFilteredOrganizaciones(data);
     } catch (error) {
-      console.error("Error fetching arbitros:", error);
+      console.error("Error fetching organizaciones:", error);
     }
   };
 
   const handleSearch = (text) => {
     setSearch(text);
-    const filtered = arbitros.filter((arbitro) =>
-      arbitro.primer_nombre.toLowerCase().includes(text.toLowerCase()),
+    const filtered = organizaciones.filter((organizacion) =>
+      organizacion.nombre.toLowerCase().includes(text.toLowerCase()),
     );
-    setFilteredArbitros(filtered);
+    setFilteredOrganizaciones(filtered);
   };
 
-  const handleCreateArbitro = async () => {
-    // Validar campos obligatorios
+  const handleCreateOrganizacion = async () => {
     if (
-      !currentArbitro.primer_nombre ||
-      !currentArbitro.primer_apellido ||
-      !currentArbitro.telefono
+      !currentOrganizacion.nombre ||
+      !currentOrganizacion.telefono ||
+      !currentOrganizacion.correo_electronico ||
+      !currentOrganizacion.no_de_cuenta
     ) {
-      Alert.alert(
-        "Error",
-        "Los campos Primer Nombre, Primer Apellido y Teléfono son obligatorios",
-      );
+      Alert.alert("Error", "Todos los campos son obligatorios");
       return;
     }
 
     try {
-      const response = await fetch(`${API_URL}crearArbitro`, {
+      const response = await fetch(`${API_URL}crearOrganizacion`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(currentArbitro),
+        body: JSON.stringify(currentOrganizacion),
       });
       const data = await response.json();
       if (data.status) {
-        fetchArbitros();
-        Alert.alert("Éxito", "Árbitro creado exitosamente");
+        fetchOrganizaciones();
+        Alert.alert("Éxito", "Organización creada exitosamente");
         closeModal();
       } else {
-        Alert.alert("Error", "Error al crear árbitro");
+        Alert.alert("Error", "Error al crear organización");
       }
     } catch (error) {
-      console.error("Error creating arbitro:", error);
+      console.error("Error creating organizacion:", error);
     }
   };
 
-  const handleEditArbitro = async (id) => {
-    // Validar campos obligatorios
+  const handleEditOrganizacion = async (id) => {
     if (
-      !currentArbitro.primer_nombre ||
-      !currentArbitro.primer_apellido ||
-      !currentArbitro.telefono
+      !currentOrganizacion.nombre ||
+      !currentOrganizacion.telefono ||
+      !currentOrganizacion.correo_electronico ||
+      !currentOrganizacion.no_de_cuenta
     ) {
-      Alert.alert(
-        "Error",
-        "Los campos Primer Nombre, Primer Apellido y Teléfono son obligatorios",
-      );
+      Alert.alert("Error", "Todos los campos son obligatorios");
       return;
     }
 
     try {
-      const response = await fetch(`${API_URL}editarArbitro/${id}`, {
+      const response = await fetch(`${API_URL}editarOrganizacion/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(currentArbitro),
+        body: JSON.stringify(currentOrganizacion),
       });
       const data = await response.json();
       if (data.status) {
-        fetchArbitros();
-        Alert.alert("Éxito", "Árbitro actualizado exitosamente");
+        fetchOrganizaciones();
+        Alert.alert("Éxito", "Organización actualizada exitosamente");
         closeModal();
       } else {
-        Alert.alert("Error", "Error al editar árbitro");
+        Alert.alert("Error", "Error al editar organización");
       }
     } catch (error) {
-      console.error("Error editing arbitro:", error);
+      console.error("Error editing organizacion:", error);
     }
   };
 
-  const handleDeactivateArbitro = async (id) => {
+  const handleDeactivateOrganizacion = async (id) => {
     try {
-      const response = await fetch(`${API_URL}desactivarArbitro/${id}`, {
+      const response = await fetch(`${API_URL}desactivarOrganizacion/${id}`, {
         method: "PUT",
       });
       const data = await response.json();
       if (data.status) {
-        fetchArbitros();
-        Alert.alert("Éxito", "Árbitro desactivado exitosamente");
+        fetchOrganizaciones();
+        Alert.alert("Éxito", "Organización desactivada exitosamente");
       } else {
-        Alert.alert("Error", "Error al desactivar árbitro");
+        Alert.alert("Error", "Error al desactivar organización");
       }
     } catch (error) {
-      console.error("Error deactivating arbitro:", error);
+      console.error("Error deactivating organizacion:", error);
     }
   };
 
-  const openModal = () => {
-    setCurrentArbitro({
-      id: null,
-      primer_nombre: "",
-      segundo_nombre: "",
-      primer_apellido: "",
-      segundo_apellido: "",
-      genero: "",
-      direccion: "",
-      telefono: "",
-    });
+  const openModal = (organizacion) => {
+    if (organizacion) {
+      setCurrentOrganizacion(organizacion);
+    } else {
+      setCurrentOrganizacion({
+        id: null,
+        nombre: "",
+        telefono: "",
+        correo_electronico: "",
+        no_de_cuenta: "",
+      });
+    }
     setModalVisible(true);
   };
 
@@ -159,28 +152,27 @@ export default function Organizador() {
     <View style={styles.container}>
       <TextInput
         style={styles.searchInput}
-        placeholder="Buscar árbitro"
+        placeholder="Buscar organización"
         value={search}
         onChangeText={handleSearch}
       />
       <FlatList
-        data={filteredArbitros}
+        data={filteredOrganizaciones}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.arbitroContainer}>
-            <Text>{item.primer_nombre}</Text>
+          <View style={styles.organizacionContainer}>
+            <Text>{item.nombre}</Text>
             <View style={styles.buttonContainer}>
-              <Button
-                title="Editar"
-                onPress={() => {
-                  setCurrentArbitro(item);
-                  openModal();
-                }}
-                color="#2EC4B6"
-              />
+              <View style={{ marginRight: 8 }}>
+                <Button
+                  title="Editar"
+                  onPress={() => openModal(item)}
+                  color="#2EC4B6"
+                />
+              </View>
               <Button
                 title="Desactivar"
-                onPress={() => handleDeactivateArbitro(item.id)}
+                onPress={() => handleDeactivateOrganizacion(item.id)}
                 color="red"
               />
             </View>
@@ -188,7 +180,7 @@ export default function Organizador() {
         )}
       />
       <Button
-        title="Crear Árbitro"
+        title="Crear Organización"
         onPress={() => openModal()}
         color="#2EC4B6"
       />
@@ -198,75 +190,63 @@ export default function Organizador() {
         onRequestClose={closeModal}
       >
         <View style={styles.modalContainer}>
-          <Text>Crear / Editar Árbitro</Text>
+          <Text>
+            {currentOrganizacion.id
+              ? "Editar Organización"
+              : "Crear Organización"}
+          </Text>
           <TextInput
             style={styles.input}
-            placeholder="Primer nombre"
-            value={currentArbitro.primer_nombre}
+            placeholder="Nombre"
+            value={currentOrganizacion.nombre}
             onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, primer_nombre: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Segundo nombre"
-            value={currentArbitro.segundo_nombre}
-            onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, segundo_nombre: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Primer apellido"
-            value={currentArbitro.primer_apellido}
-            onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, primer_apellido: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Segundo apellido"
-            value={currentArbitro.segundo_apellido}
-            onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, segundo_apellido: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Género"
-            value={currentArbitro.genero}
-            onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, genero: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Dirección"
-            value={currentArbitro.direccion}
-            onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, direccion: text })
+              setCurrentOrganizacion({ ...currentOrganizacion, nombre: text })
             }
           />
           <TextInput
             style={styles.input}
             placeholder="Teléfono"
-            value={String(currentPatrocinador.telefono)}
+            value={currentOrganizacion.telefono}
             onChangeText={(text) =>
-              setCurrentArbitro({ ...currentArbitro, telefono: text })
+              setCurrentOrganizacion({ ...currentOrganizacion, telefono: text })
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            value={currentOrganizacion.correo_electronico}
+            onChangeText={(text) =>
+              setCurrentOrganizacion({
+                ...currentOrganizacion,
+                correo_electronico: text,
+              })
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="No. de Cuenta"
+            value={currentOrganizacion.no_de_cuenta}
+            onChangeText={(text) =>
+              setCurrentOrganizacion({
+                ...currentOrganizacion,
+                no_de_cuenta: text,
+              })
             }
           />
           <Button
-            title="Guardar"
+            title={currentOrganizacion.id ? "Actualizar" : "Crear"}
             onPress={() => {
-              if (currentArbitro.id) {
-                handleEditArbitro(currentArbitro.id);
+              if (currentOrganizacion.id) {
+                handleEditOrganizacion(currentOrganizacion.id);
               } else {
-                handleCreateArbitro();
+                handleCreateOrganizacion();
               }
             }}
             color="#2EC4B6"
           />
-          <Button title="Cancelar" onPress={closeModal} color="red" />
+          <View style={{ marginTop: 8 }}>
+            <Button title="Cancelar" onPress={closeModal} color="red" />
+          </View>
         </View>
       </Modal>
     </View>
@@ -276,36 +256,36 @@ export default function Organizador() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   searchInput: {
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
   },
-  arbitroContainer: {
+  organizacionContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
-    borderBottomColor: "#ccc",
+    padding: 10,
     borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   buttonContainer: {
     flexDirection: "row",
   },
   modalContainer: {
     flex: 1,
+    padding: 20,
     justifyContent: "center",
-    padding: 16,
   },
   input: {
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });
