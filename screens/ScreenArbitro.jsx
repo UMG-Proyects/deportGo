@@ -51,7 +51,6 @@ export default function Arbitro() {
   };
 
   const handleCreateArbitro = async () => {
-    // Validar campos obligatorios
     if (
       !currentArbitro.primer_nombre ||
       !currentArbitro.primer_apellido ||
@@ -86,7 +85,6 @@ export default function Arbitro() {
   };
 
   const handleEditArbitro = async (id) => {
-    // Validar campos obligatorios
     if (
       !currentArbitro.primer_nombre ||
       !currentArbitro.primer_apellido ||
@@ -137,17 +135,21 @@ export default function Arbitro() {
     }
   };
 
-  const openModal = () => {
-    setCurrentArbitro({
-      id: null,
-      primer_nombre: "",
-      segundo_nombre: "",
-      primer_apellido: "",
-      segundo_apellido: "",
-      genero: "",
-      direccion: "",
-      telefono: "",
-    });
+  const openModal = (arbitro) => {
+    if (arbitro) {
+      setCurrentArbitro(arbitro);
+    } else {
+      setCurrentArbitro({
+        id: null,
+        primer_nombre: "",
+        segundo_nombre: "",
+        primer_apellido: "",
+        segundo_apellido: "",
+        genero: "",
+        direccion: "",
+        telefono: "",
+      });
+    }
     setModalVisible(true);
   };
 
@@ -170,14 +172,13 @@ export default function Arbitro() {
           <View style={styles.arbitroContainer}>
             <Text>{item.primer_nombre}</Text>
             <View style={styles.buttonContainer}>
-              <Button
-                title="Editar"
-                onPress={() => {
-                  setCurrentArbitro(item);
-                  openModal();
-                }}
-                color="#2EC4B6"
-              />
+              <View style={{ marginRight: 8 }}>
+                <Button
+                  title="Editar"
+                  onPress={() => openModal(item)}
+                  color="#2EC4B6"
+                />
+              </View>
               <Button
                 title="Desactivar"
                 onPress={() => handleDeactivateArbitro(item.id)}
@@ -198,7 +199,7 @@ export default function Arbitro() {
         onRequestClose={closeModal}
       >
         <View style={styles.modalContainer}>
-          <Text>Crear / Editar Árbitro</Text>
+          <Text>{currentArbitro.id ? "Editar Árbitro" : "Crear Árbitro"}</Text>
           <TextInput
             style={styles.input}
             placeholder="Primer nombre"
@@ -250,13 +251,13 @@ export default function Arbitro() {
           <TextInput
             style={styles.input}
             placeholder="Teléfono"
-            value={currentArbitro.telefono}
+            value={String(currentArbitro.telefono)}
             onChangeText={(text) =>
               setCurrentArbitro({ ...currentArbitro, telefono: text })
             }
           />
           <Button
-            title="Guardar"
+            title={currentArbitro.id ? "Actualizar" : "Crear"}
             onPress={() => {
               if (currentArbitro.id) {
                 handleEditArbitro(currentArbitro.id);
@@ -266,7 +267,9 @@ export default function Arbitro() {
             }}
             color="#2EC4B6"
           />
-          <Button title="Cancelar" onPress={closeModal} color="red" />
+          <View style={{ marginTop: 8 }}>
+            <Button title="Cancelar" onPress={closeModal} color="red" />
+          </View>
         </View>
       </Modal>
     </View>
@@ -276,36 +279,36 @@ export default function Arbitro() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   searchInput: {
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
   },
   arbitroContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
-    borderBottomColor: "#ccc",
+    padding: 10,
     borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   buttonContainer: {
     flexDirection: "row",
   },
   modalContainer: {
     flex: 1,
+    padding: 20,
     justifyContent: "center",
-    padding: 16,
   },
   input: {
-    height: 40,
-    borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });
