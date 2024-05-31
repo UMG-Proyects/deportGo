@@ -91,12 +91,11 @@ const App = () => {
                   onPress={() =>
                     navigation.navigate("Inscripciones", {
                       id: item.id,
-                      nombre: item.nombre,
                     })
                   }
                 >
                   <Image
-                    source={{ uri: item.descripcion }}
+                    source={{ uri: item.imagen }}
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
