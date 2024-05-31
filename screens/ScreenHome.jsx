@@ -10,11 +10,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { useNavigation } from "@react-navigation/native";
 import API_URL from "../src/config/config";
 
 const { height } = Dimensions.get("window");
 
 const App = () => {
+  const navigation = useNavigation();
   const [eventos, setEventos] = useState([]);
   const [deportes, setDeportes] = useState([]);
   const [currentEvento, setCurrentEvento] = useState({
@@ -84,7 +86,15 @@ const App = () => {
             horizontal
             renderItem={({ item }) => (
               <View style={styles.eventItemContainer}>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() =>
+                    navigation.navigate("Inscripciones", {
+                      id: item.id,
+                      nombre: item.nombre,
+                    })
+                  }
+                >
                   <Image
                     source={{ uri: item.descripcion }}
                     style={styles.buttonIcon}
