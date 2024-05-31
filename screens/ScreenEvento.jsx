@@ -28,6 +28,8 @@ export default function Eventos() {
   const [showDatePickerInicio, setShowDatePickerInicio] = useState(false);
   const [showDatePickerFinal, setShowDatePickerFinal] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [currentEvento, setCurrentEvento] = useState({
     id: null,
     id_categoria: "",
@@ -40,6 +42,7 @@ export default function Eventos() {
     fecha_final: "",
     hora: "",
     equipos_participantes: "",
+    participantes: "",
     ubicacion: "",
     rama: "",
   });
@@ -49,11 +52,21 @@ export default function Eventos() {
   }, []);
 
   const fetchData = async () => {
-    await fetchEventos();
-    await fetchCategorias();
-    await fetchDeportes();
-    await fetchMunicipios();
-    await fetchPatrocinadores();
+    setLoading(true);
+    setError(null);
+    try {
+      await Promise.all([
+        fetchEventos(),
+        fetchCategorias(),
+        fetchDeportes(),
+        fetchMunicipios(),
+        fetchPatrocinadores(),
+      ]);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openModal = (
@@ -69,6 +82,7 @@ export default function Eventos() {
       fecha_final: "",
       hora: "",
       equipos_participantes: "",
+      participantes: "",
       ubicacion: "",
       rama: "",
     },
@@ -89,6 +103,7 @@ export default function Eventos() {
       setFilteredEventos(data);
     } catch (error) {
       console.error("Error fetching eventos:", error);
+      setError("Error fetching eventos");
     }
   };
 
@@ -99,6 +114,7 @@ export default function Eventos() {
       setCategorias(data);
     } catch (error) {
       console.error("Error fetching categorias:", error);
+      setError("Error fetching categorias");
     }
   };
 
@@ -109,6 +125,7 @@ export default function Eventos() {
       setDeportes(data);
     } catch (error) {
       console.error("Error fetching deportes:", error);
+      setError("Error fetching deportes");
     }
   };
 
@@ -119,6 +136,7 @@ export default function Eventos() {
       setMunicipios(data);
     } catch (error) {
       console.error("Error fetching municipios:", error);
+      setError("Error fetching municipios");
     }
   };
 
@@ -129,6 +147,7 @@ export default function Eventos() {
       setPatrocinadores(data.patrocinador);
     } catch (error) {
       console.error("Error fetching patrocinadores:", error);
+      setError("Error fetching patrocinadores");
     }
   };
 
@@ -160,7 +179,7 @@ export default function Eventos() {
       });
       const data = await response.json();
       if (data.status) {
-        fetchPatrocinadores();
+        fetchEventos(); // Actualiza la lista de eventos después de crear o actualizar
         Alert.alert(
           "Éxito",
           `Evento ${currentEvento.id ? "actualizado" : "creado"} exitosamente`,
@@ -187,13 +206,13 @@ export default function Eventos() {
     );
     setFilteredEventos(filtered);
   };
+
   const deactivateEvento = async (id) => {
     try {
       const response = await fetch(`${API_URL}desactivarEvento/${id}`, {
         method: "PUT",
       });
       const data = await response.json();
-      console.log(data);
       if (data.status) {
         fetchEventos();
         Alert.alert("Éxito", "Evento desactivado exitosamente");
@@ -239,6 +258,8 @@ export default function Eventos() {
         value={search}
         onChangeText={handleSearch}
       />
+      {loading && <Text>Cargando...</Text>}
+      {error && <Text>{error}</Text>}
       <FlatList
         data={filteredEventos}
         keyExtractor={(item) => item.id.toString()}
@@ -271,7 +292,9 @@ export default function Eventos() {
       <Modal visible={modalVisible} animationType="slide">
         <ScrollView style={styles.scrollView}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Crear Evento</Text>
+            <Text style={styles.modalTitle}>
+              {currentEvento.id ? "Editar Evento" : "Crear Evento"}
+            </Text>
             <Picker
               selectedValue={currentEvento.id_categoria}
               onValueChange={(itemValue) => {
@@ -422,7 +445,18 @@ export default function Eventos() {
             />
             <TextInput
               style={styles.input}
-              placeholder="Ubicación"
+              placeholder="Participantes"
+              value={currentEvento.participantes}
+              onChangeText={(text) =>
+                setCurrentEvento({
+                  ...currentEvento,
+                  participantes: text,
+                })
+              }
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Ubicacion"
               value={currentEvento.ubicacion}
               onChangeText={(text) =>
                 setCurrentEvento({ ...currentEvento, ubicacion: text })
