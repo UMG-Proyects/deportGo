@@ -48,22 +48,12 @@ export default function Eventos() {
     fetchData();
   }, []);
 
-  const deactivateEvento = async (id) => {
-    try {
-      const response = await fetch(`${API_URL}desactivarEvento/${id}`, {
-        method: "PUT",
-      });
-      const data = await response.json();
-      console.log(data);
-      if (data.status) {
-        fetchEventos();
-        Alert.alert("Éxito", "Evento desactivado exitosamente");
-      } else {
-        Alert.alert("Error", "Error al desactivar evento");
-      }
-    } catch (error) {
-      console.error("Error deactivating evento:", error);
-    }
+  const fetchData = async () => {
+    await fetchEventos();
+    await fetchCategorias();
+    await fetchDeportes();
+    await fetchMunicipios();
+    await fetchPatrocinadores();
   };
 
   const openModal = (
@@ -87,12 +77,8 @@ export default function Eventos() {
     setModalVisible(true);
   };
 
-  const fetchData = async () => {
-    await fetchEventos();
-    await fetchCategorias();
-    await fetchDeportes();
-    await fetchMunicipios();
-    await fetchPatrocinadores();
+  const closeModal = () => {
+    setModalVisible(false);
   };
 
   const fetchEventos = async () => {
@@ -146,14 +132,6 @@ export default function Eventos() {
     }
   };
 
-  const handleSearch = (text) => {
-    setSearch(text);
-    const filtered = eventos.filter((evento) =>
-      evento.nombre.toLowerCase().includes(text.toLowerCase()),
-    );
-    setFilteredEventos(filtered);
-  };
-
   const handleCreateEvento = async () => {
     if (
       !currentEvento.id_categoria ||
@@ -202,8 +180,29 @@ export default function Eventos() {
     }
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
+  const handleSearch = (text) => {
+    setSearch(text);
+    const filtered = eventos.filter((evento) =>
+      evento.nombre.toLowerCase().includes(text.toLowerCase()),
+    );
+    setFilteredEventos(filtered);
+  };
+  const deactivateEvento = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}desactivarEvento/${id}`, {
+        method: "PUT",
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.status) {
+        fetchEventos();
+        Alert.alert("Éxito", "Evento desactivado exitosamente");
+      } else {
+        Alert.alert("Error", "Error al desactivar evento");
+      }
+    } catch (error) {
+      console.error("Error deactivating evento:", error);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -276,7 +275,6 @@ export default function Eventos() {
             <Picker
               selectedValue={currentEvento.id_categoria}
               onValueChange={(itemValue) => {
-                console.log("Nuevo valor de categoría:", itemValue);
                 setCurrentEvento({ ...currentEvento, id_categoria: itemValue });
               }}
               style={styles.picker}
