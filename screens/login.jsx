@@ -36,8 +36,8 @@ export default function Login({ navigation }) {
       .then(async ({ data }) => {
         dispatch(setUser(data.user));
         await SecureStore.setItemAsync("token", data.accesToken);
-        axios.defaults.headers.common["Authorization"] =
-          "Bearer " + data.accesToken;
+        // axios.defaults.headers.common["Authorization"] =
+        //   "Bearer " + data.accesToken;
         navigation.navigate("hom");
       })
       .catch((err) => {
@@ -49,7 +49,7 @@ export default function Login({ navigation }) {
     (async () => {
       const token = await SecureStore.getItemAsync("token");
       if (token) {
-        axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+        // axios.defaults.headers.common["Authorization"] = "Bearer " + token;
         axios
           .get("profile")
           .then(({ data }) => {
