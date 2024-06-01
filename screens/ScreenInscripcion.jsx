@@ -1,61 +1,70 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
+  Image,
   Text,
   StyleSheet,
+  ActivityIndicator,
+  ScrollView,
   Button,
   Modal,
   TextInput,
   Alert,
-  ScrollView,
-  TouchableOpacity,
-  Image,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
 import API_URL from "../src/config/config";
 
-const InscripcionScreen = () => {
-  const route = useRoute();
+const InscripcionesScreen = ({ route }) => {
   const { id } = route.params;
-
-  const [evento, setEvento] = useState({});
+  const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [inscripcion, setInscripcion] = useState({
-    nombre: "",
-    tarifa: "",
-    fecha: new Date(),
-    id_evento: id,
-    id_equipo: "",
-    edad: "",
-    genero: "",
-    telefono: "",
-    telefono_emergencia: "",
-    nombre_entrenador: "",
-  });
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [edad, setEdad] = useState("");
+  const [genero, setGenero] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [telefonoEmergencia, setTelefonoEmergencia] = useState("");
+  const [tarifa, setTarifa] = useState("");
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
+  const [equipos, setEquipos] = useState([]);
 
   useEffect(() => {
+    const fetchEvento = async () => {
+      try {
+        const responseEvento = await fetch(`${API_URL}listarEventos`);
+        const dataEvento = await responseEvento.json();
+        const eventoEncontrado = dataEvento.find((e) => e.id === id);
+        setEvento(eventoEncontrado);
+
+        const responseEquipo = await fetch(`${API_URL}listarEquipo`);
+        const dataEquipo = await responseEquipo.json();
+        setEquipos(dataEquipo);
+
+        if (!eventoEncontrado) {
+          setError("Evento no encontrado");
+        }
+        setLoading(false);
+      } catch (err) {
+        setError("Error al cargar el evento");
+        setLoading(false);
+      }
+    };
+
     fetchEvento();
-  }, []);
+  }, [id]);
 
-  const fetchEvento = async () => {
-    try {
-      const response = await fetch(`${API_URL}consultarEvento/${id}`);
-      const data = await response.json();
-      setEvento(data);
-    } catch (error) {
-      setError("Error fetching event details");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateInscripcion = async () => {
-    if (!inscripcion.nombre || !inscripcion.fecha || !inscripcion.id_evento) {
-      Alert.alert("Error", "Todos los campos obligatorios deben ser llenados");
+  const handleInscribe = async () => {
+    if (
+      !nombre ||
+      !edad ||
+      !genero ||
+      !telefono ||
+      !telefonoEmergencia ||
+      !tarifa ||
+      !equipoSeleccionado
+    ) {
+      Alert.alert("Por favor, complete todos los campos.");
       return;
     }
 
@@ -65,225 +74,245 @@ const InscripcionScreen = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(inscripcion),
+        body: JSON.stringify({
+          nombre,
+          edad,
+          genero,
+          telefono,
+          telefono_emergencia: telefonoEmergencia,
+          tarifa: parseInt(tarifa, 10),
+          nombre_entrenador: "",
+          id_evento: id,
+          id_equipo: equipoSeleccionado,
+        }),
       });
-      const data = await response.json();
-      if (data.status) {
-        Alert.alert("Éxito", "Inscripción creada exitosamente");
+      const result = await response.json();
+      if (response.ok) {
+        Alert.alert("Inscripción exitosa", result.message);
         setModalVisible(false);
       } else {
-        Alert.alert("Error", "Error al crear la inscripción");
+        Alert.alert(
+          "Error al inscribir",
+          result.message || "Error desconocido",
+        );
       }
     } catch (error) {
-      console.error("Error creating inscripción:", error);
+      Alert.alert("Error", "No se pudo conectar al servidor");
     }
   };
 
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || inscripcion.fecha;
-    setShowDatePicker(Platform.OS === "ios");
-    setInscripcion({ ...inscripcion, fecha: currentDate });
-  };
-
-  const openModal = () => {
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
   if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Cargando...</Text>
-      </View>
-    );
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>{error}</Text>
+        <Text style={styles.error}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={{ uri: evento.imagen }} style={styles.image} />
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{evento.nombre}</Text>
-        <Text style={styles.label}>Descripción:</Text>
-        <Text style={styles.details}>{evento.descripcion}</Text>
-        <Text style={styles.label}>Fecha de inicio:</Text>
-        <Text style={styles.details}>{evento.fecha_inicio}</Text>
-        <Text style={styles.label}>Fecha de fin:</Text>
-        <Text style={styles.details}>{evento.fecha_final}</Text>
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Inscribirse" onPress={openModal} color="#2EC4B6" />
-      </View>
-
-      <Modal visible={modalVisible} animationType="slide">
-        <ScrollView style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Crear Inscripción</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre"
-            value={inscripcion.nombre}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, nombre: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Tarifa"
-            keyboardType="numeric"
-            value={inscripcion.tarifa}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, tarifa: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="ID del Equipo"
-            value={inscripcion.id_equipo}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, id_equipo: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Edad"
-            keyboardType="numeric"
-            value={inscripcion.edad}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, edad: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Género"
-            value={inscripcion.genero}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, genero: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Teléfono"
-            keyboardType="phone-pad"
-            value={inscripcion.telefono}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, telefono: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Teléfono de Emergencia"
-            keyboardType="phone-pad"
-            value={inscripcion.telefono_emergencia}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, telefono_emergencia: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre del Entrenador"
-            value={inscripcion.nombre_entrenador}
-            onChangeText={(text) =>
-              setInscripcion({ ...inscripcion, nombre_entrenador: text })
-            }
-          />
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text style={styles.dateText}>
-              Fecha de inscripción: {inscripcion.fecha.toLocaleDateString()}
+    <ScrollView style={styles.scrollView}>
+      <View style={styles.container}>
+        {evento ? (
+          <>
+            <View style={styles.containerImage}>
+              <Image
+                source={{ uri: evento.imagen }}
+                style={styles.imagenHeader}
+              />
+            </View>
+            <View style={styles.tittleContainer}>
+              <Text style={styles.title}>{evento.nombre}</Text>
+            </View>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Descripción:</Text> {evento.descripcion}
             </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={inscripcion.fecha}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-          <Button
-            title="Crear Inscripción"
-            onPress={handleCreateInscripcion}
-            color="#2EC4B6"
-          />
-          <Button title="Cancelar" onPress={closeModal} color="red" />
-        </ScrollView>
-      </Modal>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Fecha Inicio:</Text>{" "}
+              {evento.fecha_inicio}
+            </Text>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Fecha Final:</Text> {evento.fecha_final}
+            </Text>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Hora:</Text> {evento.hora}
+            </Text>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Participantes:</Text>{" "}
+              {evento.participantes}
+            </Text>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Rama:</Text> {evento.rama}
+            </Text>
+            <Text style={styles.detail}>
+              <Text style={styles.bold}>Ubicación:</Text> {evento.ubicacion}
+            </Text>
+            <Button title="Inscribirse" onPress={() => setModalVisible(true)} />
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Picker
+                    selectedValue={equipoSeleccionado}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setEquipoSeleccionado(itemValue)
+                    }
+                    style={styles.pickerStyle}
+                  >
+                    <Picker.Item label="Seleccione un Equipo" value={null} />
+                    {equipos.map((equipo) => (
+                      <Picker.Item
+                        key={equipo.id}
+                        label={equipo.nombre} // Asegúrate de que este campo corresponde a tu estructura de datos
+                        value={equipo.id}
+                      />
+                    ))}
+                  </Picker>
+                  <TextInput
+                    placeholder="Nombre completo"
+                    value={nombre}
+                    onChangeText={setNombre}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Edad"
+                    value={edad}
+                    onChangeText={setEdad}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Género"
+                    value={genero}
+                    onChangeText={setGenero}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Teléfono"
+                    value={telefono}
+                    onChangeText={setTelefono}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Teléfono de Emergencia"
+                    value={telefonoEmergencia}
+                    onChangeText={setTelefonoEmergencia}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Tarifa"
+                    value={tarifa}
+                    onChangeText={setTarifa}
+                    keyboardType="numeric"
+                    style={styles.input}
+                  />
+                  <Button title="Enviar Inscripción" onPress={handleInscribe} />
+                  <View style={{ marginTop: 8 }}>
+                    <Button
+                      title="Cerrar"
+                      color="red"
+                      onPress={() => setModalVisible(false)}
+                    />
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          </>
+        ) : (
+          <Text style={styles.detail}>No se encontró el evento</Text>
+        )}
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#000067",
-    padding: 20,
+  scrollView: {
+    marginHorizontal: 20,
   },
-  text: {
-    fontSize: 18,
-    color: "white",
+  container: {
+    flex: 1,
+    alignItems: "flex-start",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "white",
-    marginVertical: 10,
-    textAlign: "left",
-  },
-  label: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "left",
-  },
-  details: {
-    fontSize: 24,
-    color: "white",
-    marginVertical: 5,
-    textAlign: "left",
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    resizeMode: "cover",
     marginBottom: 20,
+    textAlign: "center",
   },
-  detailsContainer: {
-    alignItems: "flex-start",
-  },
-  buttonContainer: {
-    marginTop: 20,
+  tittleContainer: {
+    width: "100%",
+    paddingTop: 10,
+    justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: {
-    flex: 1,
-    padding: 20,
+  detail: {
+    fontSize: 18,
+    marginVertical: 10,
   },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
+  bold: {
+    fontWeight: "bold",
+  },
+  error: {
+    color: "red",
+    fontSize: 18,
+  },
+  containerImage: {
+    width: "100%",
+    alignSelf: "center",
+  },
+  imagenHeader: {
+    width: "100%",
+    height: undefined,
+    aspectRatio: 1.5,
+    resizeMode: "cover",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  pickerStyle: {
+    width: 300,
+    backgroundColor: "#ccc",
+    borderWidth: 1,
+    borderColor: "gray",
+    marginBottom: 5,
+    paddingHorizontal: 5,
   },
   input: {
-    height: 40,
-    borderColor: "gray",
+    width: 300,
+    marginBottom: 15,
+    padding: 10,
     borderWidth: 1,
-    marginBottom: 20,
-    paddingLeft: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    color: "black",
-    marginVertical: 10,
-    paddingLeft: 10,
+    borderColor: "gray",
+    borderRadius: 5,
   },
 });
 
-export default InscripcionScreen;
+export default InscripcionesScreen;
