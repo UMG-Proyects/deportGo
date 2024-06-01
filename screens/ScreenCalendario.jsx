@@ -20,7 +20,6 @@ export default function CalendarioScreen() {
   const [arbitros, setArbitros] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [showDatePickerInicio, setShowDatePickerInicio] = useState(false);
-  // const [partidos, setPartidos] = useState([]);
   const [search, setSearch] = useState("");
   const [filteredPartidos, setFilteredPartidos] = useState([]);
   const [partido, setPartido] = useState({
@@ -82,11 +81,9 @@ export default function CalendarioScreen() {
         body: JSON.stringify(partido),
       });
       const data = await response.json();
-      console.log(data);
       if (data.status) {
         Alert.alert("Éxito", "Partido creado exitosamente");
         setModalVisible(false);
-        // Refresh your partido list if necessary
       } else {
         Alert.alert("Error", data.message);
       }
@@ -116,7 +113,6 @@ export default function CalendarioScreen() {
     try {
       const response = await fetch(`${API_URL}listarCalendario`);
       const json = await response.json();
-      console.log("Full server response:", json); // Ensure this is logging the expected data
 
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
