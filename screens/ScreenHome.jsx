@@ -54,21 +54,25 @@ const App = () => {
 
   useEffect(() => {
     if (currentEvento.id_deporte) {
-      const fetchEncuentros = async () => {
-        try {
-          const response = await fetch(
-            `${API_URL}listarEncuentros?id_deporte=${currentEvento.id_deporte}`,
-          );
-          const data = await response.json();
-          setEncuentros(data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
       fetchEncuentros();
     }
   }, [currentEvento.id_deporte]);
+
+  const fetchEncuentros = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}consultarCalendario/${currentEvento.id_deporte}`,
+      );
+      const json = await response.json();
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      setEncuentros(json);
+    } catch (error) {
+      console.error("Failed to fetch encounters:", error);
+      Alert.alert("Error", "Unable to fetch encounter data");
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -78,7 +82,9 @@ const App = () => {
         resizeMode="contain"
       />
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Eventos</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>Eventos</Text>
+        </View>
         <View style={styles.eventListContainer}>
           <FlatList
             data={eventos}
@@ -91,12 +97,11 @@ const App = () => {
                   onPress={() =>
                     navigation.navigate("Inscripciones", {
                       id: item.id,
-                      nombre: item.nombre,
                     })
                   }
                 >
                   <Image
-                    source={{ uri: item.descripcion }}
+                    source={{ uri: item.imagen }}
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
@@ -140,9 +145,9 @@ const App = () => {
           </View>
           {encuentros.map((encuentro) => (
             <View key={encuentro.id} style={styles.tableRow}>
-              <Text style={styles.tableCell}>{encuentro.equipoA}</Text>
+              <Text style={styles.tableCell}>{encuentro.equipo1_nombre}</Text>
               <Text style={styles.tableCell}>vs</Text>
-              <Text style={styles.tableCell}>{encuentro.equipoB}</Text>
+              <Text style={styles.tableCell}>{encuentro.equipo2_nombre}</Text>
               <Text style={styles.tableCell}>{encuentro.hora}</Text>
               <Text style={styles.tableCell}>{encuentro.cancha}</Text>
               <Text style={styles.tableCell}>{encuentro.direccion}</Text>
@@ -172,35 +177,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    backgroundColor: "#f5b84c", // White background for contrast
+    height: 40,
+    borderRadius: 15,
+    paddingLeft: 10,
+    marginBottom: 10,
+    marginTop: 10,
   },
   sectionTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "white",
-    marginVertical: 10,
+    color: "#333333",
   },
   eventListContainer: {
     width: "100%",
+    padding: 5,
   },
   eventList: {
     maxHeight: 300,
   },
   eventItemContainer: {
     width: 120,
-    marginHorizontal: 10,
     alignItems: "center",
   },
   button: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#0869C9",
     borderRadius: 15,
   },
   buttonIcon: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 15,
   },
   buttonText: {
@@ -213,30 +223,35 @@ const styles = StyleSheet.create({
     width: 100, // Asegura que el texto se ajuste al ancho del botón
   },
   picker: {
-    height: 30,
-    width: 200,
-    color: "white",
+    width: 170,
+    color: "#333333",
   },
-  tableContainer: {},
+  tableContainer: {
+    marginTop: 10,
+    backgroundColor: "#84b6f4", // White background for the table
+    borderRadius: 10, // Rounded corners for the table
+    paddingVertical: 10,
+  },
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#fff",
-    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#4d82bc",
   },
   tableHeaderText: {
     fontWeight: "bold",
+    color: "#333333",
   },
   tableRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#fff",
     paddingVertical: 10,
-    marginTop: 5,
+    backgroundColor: "#c4dafa",
   },
   tableCell: {
     flex: 1,
     textAlign: "center",
+    color: "#666666",
   },
 });
 

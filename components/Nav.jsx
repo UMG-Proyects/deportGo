@@ -9,7 +9,6 @@ const CustomHeader = ({ navigation, title }) => {
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 10,
-        backgroundColor: "#fff",
       }}
     >
       <TouchableOpacity onPress={() => navigation.openDrawer()}>
